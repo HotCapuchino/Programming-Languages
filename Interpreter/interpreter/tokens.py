@@ -2,7 +2,7 @@ from enum import Enum, auto
 
 
 class TokenType(Enum):
-    INTEGER = auto()
+    FLOAT = auto()
     PLUS = auto()
     MINUS = auto()
     EOS = auto()
