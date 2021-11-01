@@ -1,64 +1,21 @@
+from interpreter.lexer import Lexer
 from interpreter.tokens import TokenType, Token
 
 
 class Interpreter:
 
     def __init__(self):
-        self._pos: int = -1
         self._current_token: Token = None
-        self._text: str = ''
-        self._current_char = ''
-
-    def _next_token(self) -> Token:
-        while self._current_char != None:
-            if self._current_char == ' ':
-                self._skip()
-                continue
-            if self._current_char.isdigit():
-                return Token(TokenType.FLOAT, self._number())
-            if self._current_char == '+':
-                char = self._current_char
-                self._forward()
-                return Token(TokenType.PLUS, char)
-            if self._current_char == '-':
-                char = self._current_char
-                self._forward()
-                return Token(TokenType.MINUS, char)
-            raise InterpreterException(f"bad token '{self._current_char}'!")
-
-    def _forward(self):
-        self._pos += 1
-        if self._pos >= len(self._text):
-            self._current_char = None
-        else:
-            self._current_char = self._text[self._pos]
-
-    def _skip(self):
-        while self._current_char == ' ':
-            self._forward()
-
-    def _number(self) -> str:
-        result = []
-        dots_amount = 0
-        while self._current_char and (self._current_char.isdigit() or self._current_char == '.'):
-            if self._current_char == '.':
-                dots_amount += 1
-            if dots_amount > 1:
-                raise InterpreterException("invalid number!")
-            result.append(str(self._current_char))
-            self._forward()
-        if result[len(result) - 1] == '.':
-            raise InterpreterException("invalid number!")
-        return "".join(result)
+        self._lexer = Lexer()
 
     def check_token_type(self, type_: TokenType):
         if self._current_token.type_ == type_:
-            self._current_token = self._next_token()
+            self._current_token = self._lexer.next()
         else:
             raise InterpreterException("bad token order!")
 
     def _expression(self) -> float:
-        self._current_token = self._next_token()
+        self._current_token = self._lexer.next()
         left = self._current_token
         self.check_token_type(TokenType.FLOAT)
         op = self._current_token
@@ -79,9 +36,7 @@ class Interpreter:
         return self.interpret(text)
 
     def interpret(self, text: str) -> float:
-        self._text = text
-        self._pos = -1
-        self._forward()
+        self._lexer.init(text)
         return self._expression()
 
 
