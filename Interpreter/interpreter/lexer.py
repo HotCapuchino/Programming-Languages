@@ -10,13 +10,14 @@ class Lexer():
     def __init__(self):
         self._pos: int = -1
         self._text: str = ''
-        self._current_char = ''
+        self._current_char: str = ''
 
     def next(self) -> Token:
-        while self._current_char is not None:
+        while self._current_char != None:
             if self._current_char == ' ':
                 self._skip()
                 continue
+            
             if self._current_char.isdigit():
                 return Token(TokenType.FLOAT, self._number())
             if self._current_char == '+':
@@ -44,6 +45,7 @@ class Lexer():
                 self._forward()
                 return Token(TokenType.RPAREN, char)
             raise LexerException(f"bad token '{self._current_char}'!")
+        return Token(TokenType.EOS, None)
 
     def _forward(self):
         self._pos += 1

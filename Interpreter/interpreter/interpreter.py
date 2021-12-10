@@ -1,67 +1,43 @@
-from interpreter.lexer import Lexer
-from interpreter.tokens import TokenType, Token
+from interpreter.tokens import TokenType
+from .node import Node, Number, BinaryOperation, UnaryOperation
 
 
 class Interpreter:
+    def __call__(self, tree: Node) -> float:
+        return self._visit(tree)
 
-    def __init__(self):
-        self._current_token: Token = None
-        self._lexer = Lexer()
-
-    def check_token_type(self, type_: TokenType):
-        if self._current_token.type_ == type_:
-            self._current_token = self._lexer.next()
+    def _visit(self, node: Node) -> float:
+        if isinstance(node, Number):
+            return self._visit_number(node)
+        elif isinstance(node, UnaryOperation):
+            return self._visit_unop(node)
+        elif isinstance(node, BinaryOperation):
+            return self._visit_binop(node)
         else:
-            raise InterpreterException("bad token order!")
+            raise InterpreterException("invalid node")
 
-    def _factor(self) -> float:
-        token = self._current_token
-        print('factor', self._current_token.type_)
-        if token.type_ == TokenType.FLOAT:
-            self.check_token_type(TokenType.FLOAT)
-            return float(token.value)
-        if token.type_ == TokenType.LPAREN:
-            self.check_token_type(TokenType.LPAREN)
-            result = self._expression()
-            self.check_token_type(TokenType.RPAREN)
-            return result
-        raise InterpreterException('Invalid factor!')
+    def _visit_number(self, node: Number) -> float:
+        return float(node.token.value)
 
-    def _term(self) -> float:
-        result = self._factor()
-        ops = [TokenType.DIV, TokenType.MUL]
-        while self._current_token.type_ in ops:
-            token = self._current_token
-            if token.type_ == TokenType.MUL:
-                self.check_token_type(TokenType.MUL)
-                result *= self._factor()
-            elif token.type_ == TokenType.DIV:
-                self.check_token_type(TokenType.DIV)
-                result /= self._factor()
-        return result
+    def _visit_binop(self, node: BinaryOperation) -> float:
+        op = node.operation
+        if op.type_ == TokenType.PLUS:
+            return self._visit(node.left) + self._visit(node.right)
+        if op.type_ == TokenType.MINUS:
+            return self._visit(node.left) - self._visit(node.right)
+        if op.type_ == TokenType.MUL:
+            return self._visit(node.left) * self._visit(node.right)
+        if op.type_ == TokenType.DIV:
+            return self._visit(node.left) / self._visit(node.right)
+        raise InterpreterException("invalid operator")
 
-    def _expression(self) -> float:
-        self._current_token = self._lexer.next()
-        print('expression', self._current_token.type_)
-        ops = [TokenType.PLUS, TokenType.MINUS]
-        result = self._term()
-        while self._current_token.type_ in ops:
-            token = self._current_token
-            if token.type_ == TokenType.PLUS:
-                self.check_token_type(TokenType.PLUS)
-                result += self._term()
-                print(result)
-            elif token.type_ == TokenType.MINUS:
-                self.check_token_type(TokenType.MINUS)
-                result -= self._term()
-        return result
-
-    def __call__(self, text: str) -> float:
-        return self.interpret(text)
-
-    def interpret(self, text: str) -> float:
-        self._lexer.init(text)
-        return self._expression()
+    def _visit_unop(self, node: UnaryOperation) -> float:
+        op = node.operation
+        if op.type_ == TokenType.PLUS:
+            return self._visit(node.left)
+        if op.type_ == TokenType.MINUS:
+            return 0 - self._visit(node.left)
+        raise InterpreterException("invalid operator")
 
 
 class InterpreterException(Exception):

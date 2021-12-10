@@ -11,7 +11,6 @@ class TokenType(Enum):
     RPAREN = auto()
     EOS = auto()
 
-
 class Token:
 
     def __init__(self, type_: TokenType, value: str):
