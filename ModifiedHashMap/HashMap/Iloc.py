@@ -1,5 +1,7 @@
 from typing import Any
 
+from HashMap.ModifiedDictErrors import InvalidDictIndexException
+
 class Iloc(list):
 
     def __init__(self, linked_array: list) -> None:
@@ -15,7 +17,9 @@ class Iloc(list):
     def __delitem__(self, __i) -> None:
         return None
 
-    def __getitem__(self, __i) -> Any:
+    def __getitem__(self, __i: int) -> Any:
+        if type(__i) is not int:
+            raise InvalidDictIndexException('Wrong index type! Index should be of type int!')
         return self.__linked_array[__i][1]
 
     def pop(self, __index) -> None:

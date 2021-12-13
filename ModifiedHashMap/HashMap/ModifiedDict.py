@@ -1,5 +1,7 @@
 from typing import Any
+from HashMap.Ploc import Ploc
 from HashMap.Iloc import Iloc
+from HashMap.ModifiedDictErrors import InvalidDictIndexException
 
 
 class ModifiedDict(dict):
@@ -7,6 +9,7 @@ class ModifiedDict(dict):
     def __init__(self, *args, **kw) -> None:
         self.__dict_array = []
         self.iloc = Iloc(self.__dict_array)
+        self.ploc = Ploc(self.__dict_array)
         super(ModifiedDict, self).__init__(*args, **kw)
 
 
@@ -37,6 +40,7 @@ class ModifiedDict(dict):
                 self.__dict_array = [(__k, v)] + self.__dict_array
                 # костыль, лист меняет ссылку при переопредлении первого элемента
                 self.iloc = Iloc(self.__dict_array)
+                self.ploc = Ploc(self.__dict_array)
             elif index_to_paste > 0:
                 self.__dict_array = self.__dict_array[:index_to_paste - 1] + [(__k, v)] + self.__dict_array[index_to_paste -1:]
             else:
@@ -46,14 +50,25 @@ class ModifiedDict(dict):
 
 
     def __setitem__(self, __k, v) -> None:
+        if type(__k) is not str:
+            raise InvalidDictIndexException('Wrong key type! Key should be of type str!')
         self.__update_dict_array(__k, v)
         return super().__setitem__(__k, v)
 
 
     def __delitem__(self, __k) -> None:
+        if type(__k) is not str:
+            raise InvalidDictIndexException('Wrong key type! Key should be of type str!')
+        index_to_delete = -1
         for index, item in enumerate(self.__dict_array):
             if __k == item[0]:
-                del self.__dict_array[index]
+                index_to_delete = index
                 break
+        if index_to_delete >= 0:
+            del self.__dict_array[index_to_delete]
+            if index_to_delete == 0:
+                # костыль, лист меняет ссылку при переопредлении первого элемента
+                self.iloc = Iloc(self.__dict_array)
+                self.ploc = Ploc(self.__dict_array)
         print(self.__dict_array)
         return super().__delitem__(__k)
