@@ -1,10 +1,12 @@
 from typing import Any
+from HashMap.Iloc import Iloc
 
 
 class ModifiedDict(dict):
 
     def __init__(self, *args, **kw) -> None:
-        self.iloc = []
+        self.__dict_array = []
+        self.iloc = Iloc(self.__dict_array)
         super(ModifiedDict, self).__init__(*args, **kw)
 
 
@@ -21,7 +23,7 @@ class ModifiedDict(dict):
     def __update_dict_array(self, __k, v) -> None:
         index_to_paste = -1
         key_was_found = False
-        for index, dict_obj in enumerate(self.iloc):
+        for index, dict_obj in enumerate(self.__dict_array):
             if __k < dict_obj[index][0]:
                 index_to_paste = index
                 break
@@ -32,13 +34,15 @@ class ModifiedDict(dict):
 
         if not key_was_found:
             if index_to_paste == 0:
-                self.iloc = [(__k, v)] + self.iloc
+                self.__dict_array = [(__k, v)] + self.__dict_array
+                # костыль, лист меняет ссылку при переопредлении первого элемента
+                self.iloc = Iloc(self.__dict_array)
             elif index_to_paste > 0:
-                self.iloc = self.iloc[:index_to_paste - 1] + [(__k, v)] + self.iloc[index_to_paste -1:]
+                self.__dict_array = self.__dict_array[:index_to_paste - 1] + [(__k, v)] + self.__dict_array[index_to_paste -1:]
             else:
-                self.iloc.append((__k, v))
+                self.__dict_array.append((__k, v))
         else: 
-            self.iloc[index_to_paste] = (__k, v)
+            self.__dict_array[index_to_paste] = (__k, v)
 
 
     def __setitem__(self, __k, v) -> None:
@@ -47,9 +51,9 @@ class ModifiedDict(dict):
 
 
     def __delitem__(self, __k) -> None:
-        for index, item in enumerate(self.iloc):
+        for index, item in enumerate(self.__dict_array):
             if __k == item[0]:
-                del self.iloc[index]
+                del self.__dict_array[index]
                 break
-        print(self.iloc)
+        print(self.__dict_array)
         return super().__delitem__(__k)
