@@ -1,5 +1,5 @@
 from HashMap.ModifiedDictErrors import InvalidDigitIndexException, InvalidMathSignException
-from HashMap.Parser.tokens import AVAILABLE_MATH_SIGNS, Token, TokenType
+from HashMap.Parser.tokens import MATH_SIGNS, Token, TokenCategory, TokenType
 
 
 class Lexer:
@@ -8,6 +8,12 @@ class Lexer:
         self._pos: int = -1
         self._text: str = ''
         self._current_char: str = ''
+        self._available_math_signs = [item.value for item in MATH_SIGNS]
+
+    def init(self, text: str):
+        self._text = text
+        self._pos = -1
+        self._forward()
 
     def next(self) -> Token:
         while self._current_char != None:
@@ -18,21 +24,20 @@ class Lexer:
             if self._current_char.isdigit():
                 type, num = self._number()
                 if type == int:
-                    return Token(TokenType.INTEGER, num)
+                    return Token(TokenType.INTEGER, num, TokenCategory.DIGIT)
                 else:
-                    return Token(TokenType.FLOAT, num)
+                    return Token(TokenType.FLOAT, num, TokenCategory.DIGIT)
 
             if self._current_char == ',':
                 char = self._current_char
                 self._forward()
-                return Token(TokenType.COMMA, char)
+                return Token(TokenType.COMMA, char, TokenCategory.DIVIDER)
 
-            if self._current_char in AVAILABLE_MATH_SIGNS:
+            if self._current_char in self._available_math_signs:
                 tokenType, value = self._define_math_sign()
-                self._forward()
-                return Token(tokenType, value)
+                return Token(tokenType, value, TokenCategory.CONDITION)
                 
-        return Token(TokenType.EOS, None)
+        return Token(TokenType.EOS, None, Token)
 
     def _number(self) -> tuple:
         number = ''
@@ -51,8 +56,9 @@ class Lexer:
 
     def _define_math_sign(self) -> tuple:
         math_sign = ''
-        while self._current_char and self._current_char in AVAILABLE_MATH_SIGNS:
+        while self._current_char and self._current_char in self._available_math_signs:
             math_sign += self._current_char
+            self._forward()
         if math_sign == '<':
             return TokenType.LESS, math_sign
         if math_sign == '>':
