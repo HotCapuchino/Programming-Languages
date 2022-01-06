@@ -1,7 +1,7 @@
 from typing import Any
-from HashMap.Ploc import Ploc
-from HashMap.Iloc import Iloc
-from HashMap.ModifiedDictErrors import InvalidDictIndexException
+from .Ploc import Ploc
+from .Iloc import Iloc
+from .ModifiedDictErrors import InvalidDictIndexException, KeyDoesNotExist
 
 
 class ModifiedDict(dict):
@@ -27,10 +27,10 @@ class ModifiedDict(dict):
         index_to_paste = -1
         key_was_found = False
         for index, dict_obj in enumerate(self.__dict_array):
-            if __k < dict_obj[index][0]:
+            if __k < dict_obj[0]:
                 index_to_paste = index
                 break
-            elif __k == dict_obj[index][0]:
+            elif __k == dict_obj[0]:
                 key_was_found = True 
                 index_to_paste = index
                 break
@@ -42,7 +42,10 @@ class ModifiedDict(dict):
                 self.iloc = Iloc(self.__dict_array)
                 self.ploc = Ploc(self.__dict_array)
             elif index_to_paste > 0:
-                self.__dict_array = self.__dict_array[:index_to_paste - 1] + [(__k, v)] + self.__dict_array[index_to_paste -1:]
+                self.__dict_array = self.__dict_array[:index_to_paste] + [(__k, v)] + self.__dict_array[index_to_paste:]
+                # костыль, лист меняет ссылку при переопредлении
+                self.iloc = Iloc(self.__dict_array)
+                self.ploc = Ploc(self.__dict_array)
             else:
                 self.__dict_array.append((__k, v))
         else: 
@@ -70,5 +73,6 @@ class ModifiedDict(dict):
                 # костыль, лист меняет ссылку при переопредлении первого элемента
                 self.iloc = Iloc(self.__dict_array)
                 self.ploc = Ploc(self.__dict_array)
-        print(self.__dict_array)
+        else:
+            raise KeyDoesNotExist('Dict has no value, belongs to provided key!')
         return super().__delitem__(__k)

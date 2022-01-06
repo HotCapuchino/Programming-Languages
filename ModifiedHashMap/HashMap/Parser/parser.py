@@ -1,6 +1,6 @@
 from HashMap.ModifiedDictErrors import ParserException
-from HashMap.Parser.lexer import Lexer
-from HashMap.Parser.tokens import Token, TokenType, TokenCategory
+from .lexer import Lexer
+from .tokens import Token, TokenType
 from copy import deepcopy
 
 

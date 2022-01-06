@@ -1,6 +1,6 @@
 from typing import Any
 
-from HashMap.ModifiedDictErrors import InvalidDictIndexException
+from .ModifiedDictErrors import InvalidDictIndexException
 
 class Iloc():
 
@@ -11,3 +11,6 @@ class Iloc():
         if type(__i) is not int:
             raise InvalidDictIndexException('Wrong index type! Index should be of type int!')
         return self.__linked_array[__i][1]
+
+    def __str__(self) -> str:
+        return str(self.__linked_array)

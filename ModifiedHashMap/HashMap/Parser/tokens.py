@@ -30,11 +30,12 @@ class Token:
         self.value = value
         self.category = category
 
-    def __str__(self) -> str:
-        return f'Token({self.type_}, {self.value}, {self.category})'
+    # For debugging
+    # def __str__(self) -> str:
+    #     return f'Token({self.type_}, {self.value}, {self.category})'
 
-    def __repr__(self) -> str:
-        return str(self)
+    # def __repr__(self) -> str:
+    #     return str(self)
 
 correct_condition_order = [TokenCategory.CONDITION, TokenCategory.DIGIT, TokenCategory.DIVIDER]
 correct_key_order = [TokenCategory.DIGIT, TokenCategory.DIVIDER]

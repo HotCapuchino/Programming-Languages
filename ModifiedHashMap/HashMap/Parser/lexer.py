@@ -1,5 +1,5 @@
-from HashMap.ModifiedDictErrors import InvalidDigitIndexException, InvalidMathSignException
-from HashMap.Parser.tokens import MATH_SIGNS, Token, TokenCategory, TokenType
+from ..ModifiedDictErrors import InvalidDigitIndexException, InvalidMathSignException, LexerException
+from .tokens import MATH_SIGNS, Token, TokenCategory, TokenType
 
 
 class Lexer:
@@ -36,6 +36,8 @@ class Lexer:
             if self._current_char in self._available_math_signs:
                 tokenType, value = self._define_math_sign()
                 return Token(tokenType, value, TokenCategory.CONDITION)
+
+            raise LexerException('Your condition doesn\'t match the pattern: (CONDITION, NUMBER, DELIMITER)!')
                 
         return Token(TokenType.EOS, None, Token)
 
@@ -43,15 +45,16 @@ class Lexer:
         number = ''
         dots_amount = 0
         while self._current_char and (self._current_char.isdigit() or self._current_char == '.'):
-            if dots_amount > 0:
-                raise InvalidDigitIndexException('Invalid number! number of type int or float was expected!')
             number += str(self._current_char)
             if self._current_char == '.':
                 dots_amount += 1
             self._forward()
-        type = int
         if dots_amount > 0:
             type = float
+            number = float(number)
+        else:
+            type = int
+            number = int(number)
         return type, number
 
     def _define_math_sign(self) -> tuple:
