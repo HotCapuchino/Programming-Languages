@@ -1,0 +1,9 @@
+BEGIN
+    a := 2;
+BEGIN
+    BEGIN
+        b := a;
+    END;
+    c := a;
+END
+END.
