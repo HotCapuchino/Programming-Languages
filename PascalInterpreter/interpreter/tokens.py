@@ -29,11 +29,17 @@ class Token:
         self.type_ = type_
         self.value = value
 
-    def __str__(self):
-        return f'Token({self.type_}, {self.value})'
+    # for debugging only
+    # def __str__(self):
+    #     return f'Token({self.type_}, {self.value})'
 
-    def __repr__(self):
-        return str(self)
+    # def __repr__(self):
+    #     return str(self)
+
+    def __eq__(self, token) -> bool:
+        if isinstance(token, Token):
+            return self.type_ == token.type_ and self.value == token.value
+        return False
 
 
 FORBIDDEN_VARIABLE_NAMES = [

@@ -1,14 +1,23 @@
 from typing import Union
+from interpreter.parser import Parser
 from interpreter.tokens import TokenType
-from .node import MultiOperation, Node, Number, BinaryOperation, UnaryOperation, Variable
+from .node import Empty, MultiOperation, Node, Number, BinaryOperation, UnaryOperation, Variable
 
 
 class Interpreter:
     def __init__(self) -> None:
-        self.vaiable_dict = {}
+        self.variable_dict = {}
+        self._parser = Parser()
 
-    def __call__(self, tree: Node) -> Union[float, int]:
-        return self._visit(tree)
+    def __call__(self, text: str) -> Union[float, int]:
+        if not text:
+            return self.variable_dict
+
+        syntax_tree = self._parser(text)
+        if isinstance(syntax_tree, Empty):
+            return self.variable_dict
+
+        return self._visit(syntax_tree)
 
     def _visit(self, node: Node) -> Union[float, int]:
         if isinstance(node, Number):
@@ -28,12 +37,12 @@ class Interpreter:
         for statement in node.nodes:
             self._visit(statement)
 
-        return self.vaiable_dict
+        return self.variable_dict
 
     def _visit_variable(self, node: Variable):
-        if node.token.value not in self.vaiable_dict.keys():
+        if node.token.value not in self.variable_dict.keys():
             raise InterpreterException("Calling undefined variable!")
-        return self.vaiable_dict[node.token.value]
+        return self.variable_dict[node.token.value]
 
     def _visit_number(self, node: Number) -> Union[float, int]:
         if node.token.type_ == TokenType.INT:
@@ -42,9 +51,6 @@ class Interpreter:
             return float(node.token.value)
             
     def _visit_binop(self, node: BinaryOperation) -> Union[float, int]:
-        if not self._check_binop_types(node.left, node.right):
-            raise IncompatibleTypesException(f'Incompatible types with {type(node.left)} and {type(node.right)}!')
-
         op = node.operation
         if op.type_ == TokenType.PLUS:
             return self._visit(node.left) + self._visit(node.right)
@@ -55,7 +61,7 @@ class Interpreter:
         if op.type_ == TokenType.DIV:
             return self._visit(node.left) / self._visit(node.right)
         if op.type_ == TokenType.ASSIGN:
-            self.vaiable_dict[node.right.token.value] = self._visit(node.left)
+            self.variable_dict[node.right.token.value] = self._visit(node.left)
             return
         raise InterpreterException("invalid operator")
 
@@ -67,14 +73,5 @@ class Interpreter:
             return 0 - self._visit(node.left)
         raise InterpreterException("invalid operator")
 
-    def _check_binop_types(self, left, right) -> bool:
-        if isinstance(left, Number) and isinstance(right, Number):
-            if type(left) != type(right):
-                return False
-        return True
-
 class InterpreterException(Exception):
-    pass
-
-class IncompatibleTypesException(Exception):
     pass

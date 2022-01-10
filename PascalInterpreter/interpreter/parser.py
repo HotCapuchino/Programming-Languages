@@ -1,5 +1,5 @@
 from interpreter.lexer import Lexer
-from interpreter.node import BinaryOperation, MultiOperation, Node, Number, UnaryOperation, Variable
+from interpreter.node import BinaryOperation, Empty, MultiOperation, Node, Number, UnaryOperation, Variable
 from interpreter.tokens import Token, TokenType
 
 
@@ -22,13 +22,15 @@ class Parser:
         self._check_token_type(TokenType.EOP)
         return result
     
-    def _complex_statement(self, wrapped = False) -> Node:
+    def _complex_statement(self) -> Node:
         token = self._current_token
         result = None
         if token.type_ == TokenType.SCOPE_START:
             self._check_token_type(TokenType.SCOPE_START)
             self._check_token_type(TokenType.EOL)
             result = self._statement_list()
+            if not result:
+                result = Empty()
             self._check_token_type(TokenType.SCOPE_END)
         return result
 

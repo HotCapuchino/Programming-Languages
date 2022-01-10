@@ -94,7 +94,7 @@ class Lexer():
         while True:
             if bool(re.match(r'[\t ]', self._current_char)):
                 break
-            elif bool(re.match(AVAILABLE_VARIABLE_CHARS, self._current_char)):
+            if bool(re.match(AVAILABLE_VARIABLE_CHARS, self._current_char)):
                 result += self._current_char
                 self._forward()
             else:
