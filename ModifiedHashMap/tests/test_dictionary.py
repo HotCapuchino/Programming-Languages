@@ -88,10 +88,18 @@ class TestDictionary:
         with pytest.raises(InvalidMathSignException):
             modDict.ploc['=<2']
 
-    def test_wrong_tokens_order(self, modDict):
+    def test_wrong_tokens_order1(self, modDict):
         with pytest.raises(ParserException):
-            modDict.ploc[',2<']
+            modDict.ploc['>,2']
+
+    def test_wrong_tokens_order2(self, modDict):
+        with pytest.raises(ParserException):
+            modDict.ploc['2<']
 
     def test_selecting_several_conditions(self, modDict):
         modDict['(2, 1)'] = 90
         assert modDict.ploc['>1, >0'] == {'(2, 1)': 90}
+
+    def test_selecting_several_conditions2(self, modDict):
+        with pytest.raises(ParserException):
+            modDict.ploc['>1, >,9']

@@ -56,7 +56,6 @@ class Ploc():
             return key_value.value <= condition_value.value
         elif condition_sign.type_ == TokenType.NOT_EQUAL:
             return condition_value.value != key_value.value
-        raise TokenException('Unknown token type for math condition!')
 
     def __str__(self) -> str:
         return str(self.__linked_array)
